@@ -42,6 +42,23 @@ public_users.get('/', function (req, res) {
     //return res.status(300).json({message: "Yet to be implemented"});
 });
 
+//Async and Await method
+//ASYNC AWAIT
+const getBooks = async () => {
+    const response = await public_users.get('/');
+  
+    if (response.status === 200) {
+      return response.json();
+    } else {
+      throw new Error('Failed to get book list');
+    }
+};
+  
+public_users.get('/', async (req, res) => {
+    const books = await getBooks();
+
+    res.status(200).json({ books });
+});
 
 // Get book details based on ISBN
 public_users.get('/isbn/:isbn', function (req, res) {
@@ -56,6 +73,26 @@ public_users.get('/isbn/:isbn', function (req, res) {
     }
 });
 
+const findByISBN = async (isbn) => {
+    const response = await public_users.get(`/isbn/${isbn}`);
+  
+    if (response.status === 200) {
+      return response.json();
+    } else {
+      throw new Error('Book not found');
+    }
+};
+  
+public_users.get('/isbn/:isbn', async (req, res) => {
+try {
+    const book = await findByISBN(req.params.isbn);
+
+    res.json(book);
+} catch (error) {
+    res.status(404).send(error.message);
+}
+});
+
 // Get book details based on author
 public_users.get('/author/:author', (req, res) => {
     //Write your code here
@@ -66,6 +103,48 @@ public_users.get('/author/:author', (req, res) => {
     //res.json(booksListWithISBN.title);
     console.log("books list with id 2 " + res.send(booksListWithISBN.author));
 
+});
+
+//ASYNC AWAIT BASED ON AUTHOR
+const findByAuthor = async (author) => {
+    for (const key in books) {
+      if (books[key].author === author) {
+        return books[key];
+      }
+    }
+  
+    throw new Error('Book not found');
+};
+  
+public_users.get('/author/:author', async (req, res) => {
+try {
+    const book = await findByAuthor(req.params.author);
+
+    res.json(book);
+} catch (error) {
+    res.status(404).send(error.message);
+}
+});
+
+//ASYNC AWAIT BASED ON TITLE
+const findByTitle = async (title) => {
+    for (const key in books) {
+      if (books[key].title === title) {
+        return books[key];
+      }
+    }
+  
+    throw new Error('Book not found');
+};
+  
+public_users.get('/title/:title', async (req, res) => {
+try {
+    const book = await findByTitle(req.params.title);
+
+    res.json(book);
+} catch (error) {
+    res.status(404).send(error.message);
+}
 });
 
 // Get all books based on title
@@ -86,5 +165,13 @@ public_users.get('/review/:isbn', function (req, res) {
     res.send(review);
     //return res.status(300).json({message: "Yet to be implemented"});
 });
+
+public_users.delete("/reviewDel/:isbn", (req, res) => {
+
+    const booksListWithISBN = res.send(books[1]);
+    review = res.send(books[1].reviews);
+    res.send(review);
+
+})
 
 module.exports.general = public_users;
